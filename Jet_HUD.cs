@@ -716,16 +716,11 @@ label_5:
 					}
 				}
 			}
-			if (prop.get_IsOnScreen())
+			if (prop.IsOnScreen)
 			{
-				if (Function.Call<bool>((Hash) 0xFCDFF7B72D23A1AC, new InputArgument[3]
+				if (Function.Call<bool>((Hash) 0xFCDFF7B72D23A1AC, prop, this.Aircraft, 17) == true && !prop.IsOccluded)
 				{
-					InputArgument.op_Implicit(prop),
-					InputArgument.op_Implicit(this.Aircraft),
-					InputArgument.op_Implicit(17)
-				}) != null && !prop.IsOccluded)
-				{
-					Vector3 vector3 = prop.get_Velocity();
+					Vector3 vector3 = prop.Velocity;
 					if ((double) (vector3).Length() > 1.0)
 					{
 						PointF screen = GTA.UI.Screen.WorldToScreen(prop.Position);
@@ -764,16 +759,16 @@ label_5:
 			for (int index = 0; index < this.vehsWithBlips.Count; ++index)
 			{
 				Vehicle vehsWithBlip = this.vehsWithBlips[index];
-				if (!Entity.op_Equality((Entity) vehsWithBlip, (Entity) null) && ((Entity) vehsWithBlip).Exists() && ((Entity) vehsWithBlip).get_IsAlive() && (!this.onlyShowAircraftWithDriver || !vehsWithBlip.IsSeatFree(VehicleSeat.Driver)))
+				if (vehsWithBlip != null && vehsWithBlip.Exists() && vehsWithBlip.IsAlive && (!this.onlyShowAircraftWithDriver || !vehsWithBlip.IsSeatFree(VehicleSeat.Driver)))
 				{
 					Vector3 position = ((Entity) vehsWithBlip).Position;
 					if ((double) (position).DistanceTo(((Entity) plrPed).Position) <= (double) this.blipRadius)
 					{
-						((Entity) this.vehsWithBlips[index]).AttachedBlip.set_Rotation((int) ((Entity) vehsWithBlip).get_Heading());
+						((Entity) this.vehsWithBlips[index]).AttachedBlip.Rotation = (int) vehsWithBlip.Heading;
 						continue;
 					}
 				}
-				if (Blip.op_Inequality(((Entity) this.vehsWithBlips[index]).AttachedBlip, (Blip) null) && ((Entity) this.vehsWithBlips[index]).AttachedBlip.Exists())
+				if (this.vehsWithBlips[index].AttachedBlip != null && this.vehsWithBlips[index].AttachedBlip.Exists())
 					((Entity) this.vehsWithBlips[index]).AttachedBlip.Delete();
 				this.vehsWithBlips.RemoveAt(index);
 			}
@@ -790,19 +785,19 @@ label_5:
 		{
 			foreach (Vehicle vehicle in nearbyVehicles)
 			{
-				if (Entity.op_Inequality((Entity) vehicle, (Entity) null) && !this.vehsWithBlips.Contains(vehicle) && (((Entity) vehicle).Exists() && ((Entity) vehicle).get_IsAlive()) && (!((Entity) vehicle).AttachedBlip.Exists() && (!this.onlyShowAircraftWithDriver || !vehicle.IsSeatFree(VehicleSeat.Driver))))
+				if (vehicle != null && !this.vehsWithBlips.Contains(vehicle) && (((Entity) vehicle).Exists() && ((Entity) vehicle).IsAlive) && (!((Entity) vehicle).AttachedBlip.Exists() && (!this.onlyShowAircraftWithDriver || !vehicle.IsSeatFree(VehicleSeat.Driver))))
 				{
 					Model model = ((Entity) vehicle).Model;
 					bool isPlane;
-					if (((isPlane = (model).IsPlane) || (model)..IsHelicopter) && Model.op_Inequality(model, Model.op_Implicit("polmav")))
+					if (((isPlane = (model).IsPlane) || (model).IsHelicopter) && model != VehicleHash.Polmav)
 					{
 						Blip blip = ((Entity) vehicle).AddBlip();
-						if (vehicle.get_DisplayName().ToUpper() == "LAZER" || vehicle.get_DisplayName().ToUpper() == "BESRA")
-							blip.set_Sprite((BlipSprite) 16);
+						if (vehicle.DisplayName.ToUpper() == "LAZER" || vehicle.DisplayName.ToUpper() == "BESRA")
+							blip.Sprite = BlipSprite.Jet;
 						else
-							blip.set_Sprite(isPlane ? this.airplaneSprite : this.helicopterSprite);
-						blip.set_Color(this.BlipColor);
-						blip.set_Rotation((int) ((Entity) vehicle).get_Heading());
+							blip.Sprite = isPlane ? this.airplaneSprite : this.helicopterSprite;
+						blip.Color = this.BlipColor;
+						blip.Rotation = (int) vehicle.Heading;
 						this.vehsWithBlips.Add(vehicle);
 					}
 				}
@@ -819,8 +814,8 @@ label_5:
 			while (enumerator.MoveNext())
 			{
 				Vehicle current = enumerator.Current;
-				if (((Entity) current).Exists() && Entity.op_Inequality((Entity) current, (Entity) null) && (Blip.op_Inequality(((Entity) current).AttachedBlip, (Blip) null) && ((Entity) current).AttachedBlip.Exists()))
-					((Entity) current).AttachedBlip.Delete();
+				if (current.Exists() && current != null && current.AttachedBlip != null && current.AttachedBlip.Exists())
+					current.AttachedBlip.Delete();
 			}
 		}
 		this.vehsWithBlips.Clear();
@@ -838,8 +833,11 @@ label_5:
 		Color color,
 		float aspectRaio)
 	{
+		GTA.UI.Screen.ShowHelpTextThisFrame("Drawing texture");
+		/*
 		UI.DrawTexture(filename, this.glblTextureDrawIndex, level, time, pos, center, size, rotation, color, aspectRaio);
 		++this.glblTextureDrawIndex;
+		 * */
 	}
 
 	private void drawString2(
@@ -897,18 +895,18 @@ label_5:
 
 	public void drawLine(Vector3 from, Vector3 to, Color col)
 	{
-		Function.Call((Hash) 7742345298724472448L, new InputArgument[10]
+		Function.Call(Hash.DRAW_LINE, new InputArgument[10]
 		{
-			InputArgument.op_Implicit((float) from.X),
-			InputArgument.op_Implicit((float) from.Y),
-			InputArgument.op_Implicit((float) from.Z),
-			InputArgument.op_Implicit((float) to.X),
-			InputArgument.op_Implicit((float) to.Y),
-			InputArgument.op_Implicit((float) to.Z),
-			InputArgument.op_Implicit(col.R),
-			InputArgument.op_Implicit(col.G),
-			InputArgument.op_Implicit(col.B),
-			InputArgument.op_Implicit(col.A)
+			(float) from.X,
+			(float) from.Y,
+			(float) from.Z,
+			(float) to.X,
+			(float) to.Y,
+			(float) to.Z,
+			col.R,
+			col.G,
+			col.B,
+			col.A
 		});
 	}
 
@@ -916,14 +914,14 @@ label_5:
 	{
 		Function.Call((Hash) 4206795403398567152L, new InputArgument[8]
 		{
-			InputArgument.op_Implicit(x),
-			InputArgument.op_Implicit(y),
-			InputArgument.op_Implicit(width),
-			InputArgument.op_Implicit(height),
-			InputArgument.op_Implicit(color.R),
-			InputArgument.op_Implicit(color.G),
-			InputArgument.op_Implicit(color.B),
-			InputArgument.op_Implicit(color.A)
+			x,
+			y,
+			width,
+			height,
+			color.R,
+			color.G,
+			color.B,
+			color.A
 		});
 	}
 
@@ -931,18 +929,18 @@ label_5:
 	{
 		Function.Call((Hash) 0x8509B634FBE7DA11, new InputArgument[1]
 		{
-			InputArgument.op_Implicit("STRING")
+			"STRING"
 		});
 		Function.Call((Hash) 7789129354908300458L, new InputArgument[1]
 		{
-			InputArgument.op_Implicit(text)
+			text
 		});
 		Function.Call((Hash) 2562546386151446694L, new InputArgument[4]
 		{
-			InputArgument.op_Implicit(0),
-			InputArgument.op_Implicit(0),
-			InputArgument.op_Implicit(1),
-			InputArgument.op_Implicit(-1)
+			0,
+			0,
+			1,
+			-1
 		});
 	}
 
@@ -1047,7 +1045,7 @@ label_5:
 		OutputArgument outputArgument = new OutputArgument();
 		Function.Call((Hash) 1159492374221042396L, new InputArgument[2]
 		{
-			InputArgument.op_Implicit(Ped),
+			Ped,
 			(InputArgument) outputArgument
 		});
 		return (uint) outputArgument.GetResult<int>();
@@ -1091,7 +1089,7 @@ label_5:
 		int height = GTA.UI.Screen.Resolution.Height;
 		return (float) Function.Call<float>((Hash) 0xF1307EF624A80D87, new InputArgument[1]
 		{
-			InputArgument.op_Implicit(false)
+			false
 		});
 	}
 }
