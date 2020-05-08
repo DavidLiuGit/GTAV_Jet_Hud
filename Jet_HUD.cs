@@ -392,37 +392,37 @@ public class Jet_HUD : Script
 		this.drawString2("HGHT " + ((Entity) this.Aircraft).get_Position().Z.ToString("0"), xpos, ypos, 0.75f, this.color_HUD, false);
 		Color colorHud1 = this.color_HUD;
 		string str1 = "GEAR DOWN";
-		if (this.Aircraft.get_LandingGear() == 1 || this.Aircraft.get_LandingGear() == 2)
+		if (this.Aircraft.LandingGearState == VehicleLandingGearState.Retracting || this.Aircraft.LandingGearState == VehicleLandingGearState.Retracting)
 		{
-			if (this.Aircraft.get_LandingGear() == 1)
+			if (this.Aircraft.LandingGearState == VehicleLandingGearState.Retracting)
 				str1 = "GEAR CLSNG";
-			if (this.Aircraft.get_LandingGear() == 2)
+			if (this.Aircraft.LandingGearState == VehicleLandingGearState.Deploying)
 				str1 = "GEAR OPNG";
 			Color color = Color.FromArgb(204, 204, 0);
 			if (this.Timer1Switch)
 				this.drawString2(str1, xpos, ypos + 0.04f, 0.75f, color, false);
 		}
-		else if (this.Aircraft.get_LandingGear() == null)
+		else if (this.Aircraft.LandingGearState == null)
 		{
 			string str2 = "GEAR DOWN";
 			Color colorHud2 = this.color_HUD;
 			this.drawString2(str2, xpos, ypos + 0.04f, 0.75f, colorHud2, false);
 		}
-		else if (this.Aircraft.get_LandingGear() == 3)
+		else if (this.Aircraft.LandingGearState == VehicleLandingGearState.Retracted)
 		{
 			string str2 = "GEAR UP";
 			Color colorHud2 = this.color_HUD;
 			this.drawString2(str2, xpos, ypos + 0.04f, 0.75f, colorHud2, false);
 		}
-		if (this.Aircraft.get_EngineRunning() || this.Aircraft.get_IsStopped())
+		if (this.Aircraft.IsEngineRunning || this.Aircraft.IsStopped)
 		{
-			this.drawString2("ENG  " + (this.Aircraft.get_EngineRunning() ? "ON" : "OFF"), xpos, ypos + 0.08f, 0.75f, this.color_HUD, false);
+			this.drawString2("ENG  " + (this.Aircraft.IsEngineRunning ? "ON" : "OFF"), xpos, ypos + 0.08f, 0.75f, this.color_HUD, false);
 		}
 		else
 		{
 			if (!this.Timer1Switch)
 				return;
-			this.drawString2("ENG  " + (this.Aircraft.get_EngineRunning() ? "ON" : "OFF"), xpos, ypos + 0.08f, 0.75f, Color.FromArgb(204, 204, 0), false);
+			this.drawString2("ENG  " + (this.Aircraft.IsEngineRunning ? "ON" : "OFF"), xpos, ypos + 0.08f, 0.75f, Color.FromArgb(204, 204, 0), false);
 		}
 	}
 
@@ -751,7 +751,7 @@ label_5:
 				}) != null && !prop.get_IsOccluded())
 				{
 					Vector3 vector3 = prop.get_Velocity();
-					if ((double) ((Vector3) ref vector3).Length() > 1.0)
+					if ((double) (vector3).Length() > 1.0)
 					{
 						Point screen = GTA.UI.Screen.WorldToScreen(prop.get_Position());
 						float xpos = (float) screen.X / (float) GTA.UI.Screen.Width;
@@ -759,9 +759,9 @@ label_5:
 						if (screen.X != 0 && screen.Y != 0)
 						{
 							vector3 = prop.get_Position();
-							float num2 = ((Vector3) ref vector3).DistanceTo(((Entity) this.Aircraft).get_Position());
+							float num2 = (vector3).DistanceTo(((Entity) this.Aircraft).get_Position());
 							vector3 = prop.get_Position();
-							this.drawString2("\nMISL DST: " + ((Vector3) ref vector3).DistanceTo(((Entity) this.Aircraft).get_Position()).ToString("0"), xpos, num1 - 0.085f, 0.5f, Color.Red, true);
+							this.drawString2("\nMISL DST: " + (vector3).DistanceTo(((Entity) this.Aircraft).get_Position()).ToString("0"), xpos, num1 - 0.085f, 0.5f, Color.Red, true);
 							float scale = (float) (150.0 / (double) num2 * 1.5);
 							if ((double) num2 <= 150.0)
 								scale = 1.5f;
@@ -792,7 +792,7 @@ label_5:
 				if (!Entity.op_Equality((Entity) vehsWithBlip, (Entity) null) && ((Entity) vehsWithBlip).Exists() && ((Entity) vehsWithBlip).get_IsAlive() && (!this.onlyShowAircraftWithDriver || !vehsWithBlip.IsSeatFree((VehicleSeat) -1)))
 				{
 					Vector3 position = ((Entity) vehsWithBlip).get_Position();
-					if ((double) ((Vector3) ref position).DistanceTo(((Entity) plrPed).get_Position()) <= (double) this.blipRadius)
+					if ((double) (position).DistanceTo(((Entity) plrPed).get_Position()) <= (double) this.blipRadius)
 					{
 						((Entity) this.vehsWithBlips[index]).get_CurrentBlip().set_Rotation((int) ((Entity) vehsWithBlip).get_Heading());
 						continue;
@@ -981,7 +981,7 @@ label_5:
 	{
 		angle = (float) this.DegreeToRadian((double) angle);
 		Vector3 vector3;
-		((Vector3) ref vector3).\u002Ector(0.0f, 0.0f, 0.0f);
+		(vector3).\u002Ector(0.0f, 0.0f, 0.0f);
 		switch (axis)
 		{
 			case 0:
@@ -1011,7 +1011,7 @@ label_5:
 
 	private float DirectionToHeadingInRadians(Vector3 dir)
 	{
-		dir.Z = (__Null) 0.0;
+		dir.Z = 0.0f;
 		dir.Normalize();
 		return (float) System.Math.Atan2((double) dir.X, (double) dir.Y);
 	}
@@ -1030,9 +1030,9 @@ label_5:
 		string str2 = !this.VehicleWeapons.TryGetValue(Jet_HUD.GetVehicleCurrentWeapon(this.PlayerPed), out str1) ? "[GUN]" : str1;
 		if (str2 == this.vehicleWeaponBefore && (str2 == "VEHICLE_WEAPON_SPACE_ROCKET" || str2 == "VEHICLE_WEAPON_PLANE_ROCKET"))
 		{
-			if (Game.IsControlJustPressed(0, (Control) 99))
+			if (Game.IsControlJustPressed((GTA.Control) 99))
 				this.missileType = "MISL UG";
-			if (Game.IsControlJustPressed(0, (Control) 100))
+			if (Game.IsControlJustPressed((GTA.Control) 100))
 				this.missileType = "MISL GD";
 		}
 		else
@@ -1078,7 +1078,7 @@ label_5:
 	private string getVector3Pos(Vector3 v)
 	{
 		// ISSUE: explicit non-virtual call
-		return "X: " + v.X.ToString("0.0") + "\nY: " + v.Y.ToString("0.0") + "\nZ: " + __nonvirtual (v.Z.ToString());
+		return "X: " + v.X.ToString("0.0") + "\nY: " + v.Y.ToString("0.0") + "\nZ: " + v.Z.ToString("0.0");
 	}
 
 	private bool isPositive(float number)
