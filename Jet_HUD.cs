@@ -360,7 +360,7 @@ public class Jet_HUD : Script
 			if (str2.Length == 1)
 				str2 = "0" + str2;
 			string str3 = ((int) Function.Call<int>((Hash) 0x961777E64BDAF717, new InputArgument[0])).ToString();
-			this.drawString2("DATE " + str1 + " " + str2 + " " + str3 + "\nTIME " + World.get_CurrentDayTime().ToString().Replace(":", " "), xpos, ypos, 0.5f, this.color_HUD, false);
+			this.drawString2("DATE " + str1 + " " + str2 + " " + str3 + "\nTIME " + World.CurrentTimeOfDay.ToString().Replace(":", " "), xpos, ypos, 0.5f, this.color_HUD, false);
 		}
 	}
 
@@ -434,7 +434,7 @@ public class Jet_HUD : Script
 			this.gpsY = (float) ((Entity) this.Aircraft).get_Position().Y;
 			this.gpsLast = (long) Environment.TickCount;
 		}
-		this.drawString2("GPS DTA\nLNG " + this.gpsX.ToString("0") + "\nLAT " + this.gpsY.ToString("0") + "\n" + World.GetZoneName(((Entity) this.Aircraft).get_Position()).ToUpper(), 0.0f, 0.0f, 0.5f, this.color_HUD, false);
+		this.drawString2("GPS DTA\nLNG " + this.gpsX.ToString("0") + "\nLAT " + this.gpsY.ToString("0") + "\n" + World.GetZoneDisplayName((this.Aircraft).get_Position()).ToUpper(), 0.0f, 0.0f, 0.5f, this.color_HUD, false);
 	}
 
 	private float getAngleBetween2Points2D(Vector3 p1, Vector3 p2)
@@ -465,7 +465,7 @@ public class Jet_HUD : Script
 		bool isWaypointActive = Game.get_IsWaypointActive();
 		if (isWaypointActive)
 		{
-			float num4 = this.getAngleBetween2Points2D(((Entity) this.Aircraft).get_Position(), World.GetWaypointPosition()) - this.getAngleBetween2Points2D(Vector3.op_Addition(((Entity) this.Aircraft).get_Position(), Vector3.op_Multiply(((Entity) this.Aircraft).get_ForwardVector(), 10f)), ((Entity) this.Aircraft).get_Position());
+			float num4 = this.getAngleBetween2Points2D(((Entity) this.Aircraft).get_Position(), World.WaypointPosition) - this.getAngleBetween2Points2D(Vector3.op_Addition(((Entity) this.Aircraft).get_Position(), Vector3.op_Multiply(((Entity) this.Aircraft).get_ForwardVector(), 10f)), ((Entity) this.Aircraft).get_Position());
 			float num5 = num4;
 			if ((double) num4 < -180.0)
 			{
@@ -789,17 +789,17 @@ label_5:
 			for (int index = 0; index < this.vehsWithBlips.Count; ++index)
 			{
 				Vehicle vehsWithBlip = this.vehsWithBlips[index];
-				if (!Entity.op_Equality((Entity) vehsWithBlip, (Entity) null) && ((Entity) vehsWithBlip).Exists() && ((Entity) vehsWithBlip).get_IsAlive() && (!this.onlyShowAircraftWithDriver || !vehsWithBlip.IsSeatFree((VehicleSeat) -1)))
+				if (!Entity.op_Equality((Entity) vehsWithBlip, (Entity) null) && ((Entity) vehsWithBlip).Exists() && ((Entity) vehsWithBlip).get_IsAlive() && (!this.onlyShowAircraftWithDriver || !vehsWithBlip.IsSeatFree(VehicleSeat.Driver)))
 				{
 					Vector3 position = ((Entity) vehsWithBlip).get_Position();
 					if ((double) (position).DistanceTo(((Entity) plrPed).get_Position()) <= (double) this.blipRadius)
 					{
-						((Entity) this.vehsWithBlips[index]).get_CurrentBlip().set_Rotation((int) ((Entity) vehsWithBlip).get_Heading());
+						((Entity) this.vehsWithBlips[index]).AttachedBlip.set_Rotation((int) ((Entity) vehsWithBlip).get_Heading());
 						continue;
 					}
 				}
-				if (Blip.op_Inequality(((Entity) this.vehsWithBlips[index]).get_CurrentBlip(), (Blip) null) && ((Entity) this.vehsWithBlips[index]).get_CurrentBlip().Exists())
-					((Entity) this.vehsWithBlips[index]).get_CurrentBlip().Remove();
+				if (Blip.op_Inequality(((Entity) this.vehsWithBlips[index]).AttachedBlip, (Blip) null) && ((Entity) this.vehsWithBlips[index]).AttachedBlip.Exists())
+					((Entity) this.vehsWithBlips[index]).AttachedBlip.Delete();
 				this.vehsWithBlips.RemoveAt(index);
 			}
 		}
@@ -815,7 +815,7 @@ label_5:
 		{
 			foreach (Vehicle vehicle in nearbyVehicles)
 			{
-				if (Entity.op_Inequality((Entity) vehicle, (Entity) null) && !this.vehsWithBlips.Contains(vehicle) && (((Entity) vehicle).Exists() && ((Entity) vehicle).get_IsAlive()) && (!((Entity) vehicle).get_CurrentBlip().Exists() && (!this.onlyShowAircraftWithDriver || !vehicle.IsSeatFree((VehicleSeat) -1))))
+				if (Entity.op_Inequality((Entity) vehicle, (Entity) null) && !this.vehsWithBlips.Contains(vehicle) && (((Entity) vehicle).Exists() && ((Entity) vehicle).get_IsAlive()) && (!((Entity) vehicle).AttachedBlip.Exists() && (!this.onlyShowAircraftWithDriver || !vehicle.IsSeatFree(VehicleSeat.Driver))))
 				{
 					Model model = ((Entity) vehicle).get_Model();
 					bool isPlane;
@@ -844,8 +844,8 @@ label_5:
 			while (enumerator.MoveNext())
 			{
 				Vehicle current = enumerator.Current;
-				if (((Entity) current).Exists() && Entity.op_Inequality((Entity) current, (Entity) null) && (Blip.op_Inequality(((Entity) current).get_CurrentBlip(), (Blip) null) && ((Entity) current).get_CurrentBlip().Exists()))
-					((Entity) current).get_CurrentBlip().Remove();
+				if (((Entity) current).Exists() && Entity.op_Inequality((Entity) current, (Entity) null) && (Blip.op_Inequality(((Entity) current).AttachedBlip, (Blip) null) && ((Entity) current).AttachedBlip.Exists()))
+					((Entity) current).AttachedBlip.Delete();
 			}
 		}
 		this.vehsWithBlips.Clear();
@@ -980,23 +980,22 @@ label_5:
 	public Vector3 rotateVector3OnAxis(Vector3 vector3torotate, float angle, int axis)
 	{
 		angle = (float) this.DegreeToRadian((double) angle);
-		Vector3 vector3;
-		(vector3).\u002Ector(0.0f, 0.0f, 0.0f);
+		Vector3 vector3 = Vector3.Zero;
 		switch (axis)
 		{
 			case 0:
 				vector3.X = vector3torotate.X;
-				vector3.Y = (__Null) (vector3torotate.Y * System.Math.Cos((double) angle) - vector3torotate.Z * System.Math.Sin((double) angle));
-				vector3.Z = (__Null) (vector3torotate.Y * System.Math.Sin((double) angle) + vector3torotate.Z * System.Math.Cos((double) angle));
+				vector3.Y = (float)(vector3torotate.Y * System.Math.Cos((double) angle) - vector3torotate.Z * System.Math.Sin((double) angle));
+				vector3.Z = (float)(vector3torotate.Y * System.Math.Sin((double) angle) + vector3torotate.Z * System.Math.Cos((double) angle));
 				return vector3;
 			case 1:
-				vector3.X = (__Null) (vector3torotate.Z * System.Math.Sin((double) angle) + vector3torotate.X * System.Math.Cos((double) angle));
+				vector3.X = (float)(vector3torotate.Z * System.Math.Sin((double) angle) + vector3torotate.X * System.Math.Cos((double) angle));
 				vector3.Y = vector3torotate.Y;
-				vector3.Z = (__Null) (vector3torotate.Z * System.Math.Cos((double) angle) - vector3torotate.X * System.Math.Sin((double) angle));
+				vector3.Z = (float)(vector3torotate.Z * System.Math.Cos((double) angle) - vector3torotate.X * System.Math.Sin((double) angle));
 				return vector3;
 			case 2:
-				vector3.X = (__Null) (vector3torotate.X * System.Math.Cos((double) angle) + vector3torotate.Y * System.Math.Sin((double) angle));
-				vector3.Y = (__Null) (-vector3torotate.X * System.Math.Cos((double) angle) + vector3torotate.Y * System.Math.Sin((double) angle));
+				vector3.X = (float)(vector3torotate.X * System.Math.Cos((double) angle) + vector3torotate.Y * System.Math.Sin((double) angle));
+				vector3.Y = (float)(-vector3torotate.X * System.Math.Cos((double) angle) + vector3torotate.Y * System.Math.Sin((double) angle));
 				vector3.Z = vector3torotate.Z;
 				return vector3;
 			default:
@@ -1098,19 +1097,19 @@ label_5:
 
 	public float GetScreenResolutionRatio()
 	{
-		int width1 = Game.get_ScreenResolution().Width;
-		int height1 = Game.get_ScreenResolution().Height;
-		Size screenResolution = Game.get_ScreenResolution();
+		int width1 = GTA.UI.Screen.Resolution.Width;
+		int height1 = GTA.UI.Screen.Resolution.Height;
+		Size screenResolution = GTA.UI.Screen.Resolution;
 		double width2 = (double) screenResolution.Width;
-		screenResolution = Game.get_ScreenResolution();
+		screenResolution = GTA.UI.Screen.Resolution;
 		double height2 = (double) screenResolution.Height;
 		return (float) (width2 / height2);
 	}
 
 	public float GetScreenResolutionRatioX()
 	{
-		int width = Game.get_ScreenResolution().Width;
-		int height = Game.get_ScreenResolution().Height;
+		int width = GTA.UI.Screen.Resolution.Width;
+		int height = GTA.UI.Screen.Resolution.Height;
 		return (float) Function.Call<float>((Hash) 0xF1307EF624A80D87, new InputArgument[1]
 		{
 			InputArgument.op_Implicit(false)
