@@ -72,6 +72,7 @@ public class Jet_HUD : Script
   private string weaponSelectionText;
   private Dictionary<uint, string> VehicleWeapons;
 
+
   public Jet_HUD()
   {
     List<HudComponent> hudComponentList = new List<HudComponent>();
@@ -175,18 +176,18 @@ public class Jet_HUD : Script
     try
     {
       this.Config = ScriptSettings.Load(this.f_Settings);
-      this.modEnabled = (bool) this.Config.GetValue<bool>("SETTINGS", "modEnabled", (M0) 1);
-      this.reallifeDateTime = (bool) this.Config.GetValue<bool>("SETTINGS", "REALLIFE_DATETIME", (M0) 0);
-      this.displayArtificialHorizon = (bool) this.Config.GetValue<bool>("SETTINGS", "DISPLAY_ARTIFICIAL_HORIZON", (M0) 1);
-      this.display3DRadar = (bool) this.Config.GetValue<bool>("SETTINGS", "DISPLAY_3D_RADAR", (M0) 1);
-      this.displayMinimapRadar = (bool) this.Config.GetValue<bool>("SETTINGS", "DISPLAY_MINIMAP_RADAR", (M0) 1);
-      this.displayMissileWarnSystem = (bool) this.Config.GetValue<bool>("SETTINGS", "DISPLAY_MISSILE_WARN_SYSTEM", (M0) 1);
-      this.staticArtificialHorizon = (bool) this.Config.GetValue<bool>("SETTINGS", "STATIC_ARTIFICIAL_HORIZON", (M0) 0);
-      this.gpsRefreshRate = (long) this.Config.GetValue<long>("SETTINGS", "GPS_REFRESH_RATE", (M0) 500L);
-      this.getAllVehiclesInterval = (long) this.Config.GetValue<long>("SETTINGS", "3D_RADAR_REFRESH_RATE", (M0) 10000L);
-      this.getAllPropsInterval = (long) this.Config.GetValue<long>("SETTINGS", "MISSILE_WARN_SYSTEM_REFRESH_RATE", (M0) 100L);
-      this.color_HUD = Color.FromArgb((int) this.Config.GetValue<int>("SETTINGS", "HUD_A", (M0) (int) byte.MaxValue), (int) this.Config.GetValue<int>("SETTINGS", "HUD_R", (M0) 67), (int) this.Config.GetValue<int>("SETTINGS", "HUD_G", (M0) 197), (int) this.Config.GetValue<int>("SETTINGS", "HUD_B", (M0) 0));
-      this.xOffsetRight = float.Parse(((string) this.Config.GetValue<string>("SETTINGS", "XOFFSET_RIGHT_ELEMENTS", (M0) "0.0")).Replace(',', '.'), (IFormatProvider) CultureInfo.InvariantCulture);
+      this.modEnabled = (bool) this.Config.GetValue<bool>("SETTINGS", "modEnabled", true);
+      this.reallifeDateTime = (bool) this.Config.GetValue<bool>("SETTINGS", "REALLIFE_DATETIME", false);
+      this.displayArtificialHorizon = (bool) this.Config.GetValue<bool>("SETTINGS", "DISPLAY_ARTIFICIAL_HORIZON", true);
+      this.display3DRadar = (bool) this.Config.GetValue<bool>("SETTINGS", "DISPLAY_3D_RADAR",  true);
+      this.displayMinimapRadar = (bool) this.Config.GetValue<bool>("SETTINGS", "DISPLAY_MINIMAP_RADAR",  true);
+      this.displayMissileWarnSystem = (bool) this.Config.GetValue<bool>("SETTINGS", "DISPLAY_MISSILE_WARN_SYSTEM", true);
+      this.staticArtificialHorizon = (bool) this.Config.GetValue<bool>("SETTINGS", "STATIC_ARTIFICIAL_HORIZON", false);
+      this.gpsRefreshRate = (long) this.Config.GetValue<long>("SETTINGS", "GPS_REFRESH_RATE",  500L);
+      this.getAllVehiclesInterval = (long) this.Config.GetValue<long>("SETTINGS", "3D_RADAR_REFRESH_RATE",  10000L);
+      this.getAllPropsInterval = (long) this.Config.GetValue<long>("SETTINGS", "MISSILE_WARN_SYSTEM_REFRESH_RATE",  100L);
+      this.color_HUD = Color.FromArgb((int) this.Config.GetValue<int>("SETTINGS", "HUD_A",  (int) byte.MaxValue), (int) this.Config.GetValue<int>("SETTINGS", "HUD_R",  67), (int) this.Config.GetValue<int>("SETTINGS", "HUD_G",  197), (int) this.Config.GetValue<int>("SETTINGS", "HUD_B",  0));
+      this.xOffsetRight = float.Parse(((string) this.Config.GetValue<string>("SETTINGS", "XOFFSET_RIGHT_ELEMENTS",  "0.0")).Replace(',', '.'), (IFormatProvider) CultureInfo.InvariantCulture);
       this.SupportedAircraftList = new List<string>((IEnumerable<string>) File.ReadAllLines(this.f_Aircrafts));
       this.blipRadius = 10000f;
       this.airplaneSprite = (BlipSprite) 423;
@@ -196,7 +197,7 @@ public class Jet_HUD : Script
     }
     catch (Exception ex)
     {
-      UI.Notify("~r~Error~w~:Failed to load JET HUD settings.");
+      Notification.Show("~r~Error~w~:Failed to load JET HUD settings.");
     }
   }
 
@@ -297,7 +298,7 @@ public class Jet_HUD : Script
         this.toggle_step = 0;
         break;
     }
-    if (!Game.IsControlPressed(0, (Control) 26) || !Game.IsControlPressed(0, (Control) 22) || (!Game.IsControlPressed(0, (Control) 87) || !this.PlayerPed.IsInVehicle()))
+    if (!Game.IsControlPressed((GTA.Control) 26) || !Game.IsControlPressed((GTA.Control) 22) || (!Game.IsControlPressed((GTA.Control) 87) || !this.PlayerPed.IsInVehicle()))
       return;
     List<string> supportedAircraftList1 = this.SupportedAircraftList;
     Model model1 = ((Entity) this.PlayerPed.get_CurrentVehicle()).get_Model();
@@ -310,15 +311,15 @@ public class Jet_HUD : Script
       supportedAircraftList2.Add(str2);
       if (File.Exists(this.f_Aircrafts))
         File.WriteAllLines(this.f_Aircrafts, (IEnumerable<string>) this.SupportedAircraftList);
-      UI.Notify("~b~Added vehicle to supported aircrafts for Jet HUD mod.");
+      Notification.Show("~b~Added vehicle to supported aircrafts for Jet HUD mod.");
     }
     else
-      UI.Notify("~b~This vehicle is already part of supported aircrafts for Jet HUD mod.");
+      Notification.Show("~b~This vehicle is already part of supported aircrafts for Jet HUD mod.");
   }
 
   private void drawDateTime()
   {
-    float xpos = (float) (1.0 - Function.Call<float>((Hash) -1067213516044759673L, new InputArgument[1]
+    float xpos = (float) (1.0 - Function.Call<float>((Hash)(-1067213516044759673L), new InputArgument[1]
     {
       InputArgument.op_Implicit(false)
     }) / 10.0) + this.xOffsetRight;
