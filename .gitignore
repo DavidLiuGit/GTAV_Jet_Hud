@@ -354,3 +354,4 @@ MigrationBackup/
 *.zip
 README.html
 _Jet_HUD.cs
+obj/
