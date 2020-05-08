@@ -266,11 +266,11 @@ public class Jet_HUD : Script
           this.modEnabled = !this.modEnabled;
           this.toggle_step = 0;
           this.removeBlips();
-          Function.Call((Hash) -6473562613796048854L, new InputArgument[1]
+          Function.Call(Hash.DISPLAY_HUD, new InputArgument[1]
           {
             InputArgument.op_Implicit(true)
           });
-          Function.Call((Hash) -6851178707428514157L, new InputArgument[1]
+          Function.Call(Hash.DISPLAY_RADAR, new InputArgument[1]
           {
             InputArgument.op_Implicit(true)
           });
@@ -319,7 +319,7 @@ public class Jet_HUD : Script
 
   private void drawDateTime()
   {
-    float xpos = (float) (1.0 - Function.Call<float>((Hash)(-1067213516044759673L), new InputArgument[1]
+    float xpos = (float) (1.0 - Function.Call<float>(Hash._GET_ASPECT_RATIO, new InputArgument[1]
     {
       InputArgument.op_Implicit(false)
     }) / 10.0) + this.xOffsetRight;
@@ -333,10 +333,10 @@ public class Jet_HUD : Script
       string str1 = ((int) Function.Call<int>((Hash) 4400224173958044981L, new InputArgument[0])).ToString();
       if (str1.Length == 1)
         str1 = "0" + str1;
-      string str2 = (Function.Call<int>((Hash) -4915917506096244831L, new InputArgument[0]) + 1).ToString();
+      string str2 = (Function.Call<int>((Hash) 0xBBC72712E80257A1, new InputArgument[0]) + 1).ToString();
       if (str2.Length == 1)
         str2 = "0" + str2;
-      string str3 = ((int) Function.Call<int>((Hash) -7631499212557191401L, new InputArgument[0])).ToString();
+      string str3 = ((int) Function.Call<int>((Hash) 0x961777E64BDAF717, new InputArgument[0])).ToString();
       this.drawString2("DATE " + str1 + " " + str2 + " " + str3 + "\nTIME " + World.get_CurrentDayTime().ToString().Replace(":", " "), xpos, ypos, 0.5f, this.color_HUD, false);
     }
   }
@@ -347,7 +347,7 @@ public class Jet_HUD : Script
     float ypos = 0.5f;
     this.drawString2("SPD " + (this.Aircraft.get_Speed() * 3.6f).ToString("0"), xpos, ypos, 0.75f, this.color_HUD, false);
     this.drawString2("VSPD " + (((float) ((Entity) this.Aircraft).get_Position().Z - this.heightBef) / Game.get_LastFrameTime()).ToString("0.00", (IFormatProvider) CultureInfo.InvariantCulture), xpos, ypos + 0.04f, 0.75f, this.color_HUD, false);
-    this.drawString2("ROL  " + ((float) ((Vector3) Function.Call<Vector3>((Hash) -5783358815733965127L, new InputArgument[2]
+    this.drawString2("ROL  " + ((float) ((Vector3) Function.Call<Vector3>((Hash) 0xAFBD61CC738D9EB9, new InputArgument[2]
     {
       InputArgument.op_Implicit(this.Aircraft),
       InputArgument.op_Implicit(2)
@@ -359,7 +359,7 @@ public class Jet_HUD : Script
   private void drawMechanicalInfo()
   {
     this.getSelectedAircraftWeapons();
-    float xpos = (float) (0.975000023841858 - Function.Call<float>((Hash) -1067213516044759673L, new InputArgument[1]
+    float xpos = (float) (0.975000023841858 - Function.Call<float>((Hash) 0xF1307EF624A80D87, new InputArgument[1]
     {
       InputArgument.op_Implicit(false)
     }) / 10.0) + this.xOffsetRight;
@@ -581,7 +581,7 @@ label_5:
     {
       if (Entity.op_Inequality((Entity) vehicle, (Entity) this.Aircraft) && vehicle.get_IsDriveable() && ((Entity) vehicle).get_IsOnScreen())
       {
-        if (Function.Call<bool>((Hash) -225189090236849748L, new InputArgument[3]
+        if (Function.Call<bool>((Hash) 0xFCDFF7B72D23A1AC, new InputArgument[3]
         {
           InputArgument.op_Implicit(vehicle),
           InputArgument.op_Implicit(this.Aircraft),
@@ -605,7 +605,7 @@ label_5:
 
   private void drawArtificialHorizon()
   {
-    float y = (float) ((Vector3) Function.Call<Vector3>((Hash) -5783358815733965127L, new InputArgument[2]
+    float y = (float) ((Vector3) Function.Call<Vector3>((Hash) 0xAFBD61CC738D9EB9, new InputArgument[2]
     {
       InputArgument.op_Implicit(this.Aircraft),
       InputArgument.op_Implicit(2)
@@ -620,7 +620,7 @@ label_5:
     }
     ((Entity) this.Aircraft).get_Rotation();
     bool flag = true;
-    if (screen.X == 0 && screen.X == 0 || Game.IsControlPressed(0, (Control) 26))
+    if (screen.X == 0 && screen.X == 0 || Game.IsControlPressed((GTA.Control) 26))
       flag = false;
     float num3 = 0.3f;
     float num4 = 0.1f;
@@ -714,7 +714,7 @@ label_5:
       }
       if (prop.get_IsOnScreen())
       {
-        if (Function.Call<bool>((Hash) -225189090236849748L, new InputArgument[3]
+        if (Function.Call<bool>((Hash) 0xFCDFF7B72D23A1AC, new InputArgument[3]
         {
           InputArgument.op_Implicit(prop),
           InputArgument.op_Implicit(this.Aircraft),
@@ -921,7 +921,7 @@ label_5:
 
   private void displayHelpTextThisFrame(string text)
   {
-    Function.Call((Hash) -8860350453193909743L, new InputArgument[1]
+    Function.Call((Hash) 0x8509B634FBE7DA11, new InputArgument[1]
     {
       InputArgument.op_Implicit("STRING")
     });
@@ -1082,7 +1082,7 @@ label_5:
   {
     int width = Game.get_ScreenResolution().Width;
     int height = Game.get_ScreenResolution().Height;
-    return (float) Function.Call<float>((Hash) -1067213516044759673L, new InputArgument[1]
+    return (float) Function.Call<float>((Hash) 0xF1307EF624A80D87, new InputArgument[1]
     {
       InputArgument.op_Implicit(false)
     });
