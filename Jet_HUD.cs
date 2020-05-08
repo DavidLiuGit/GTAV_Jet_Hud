@@ -21,7 +21,7 @@ public class Jet_HUD : Script
 	private const string ScriptName = "JET HUD";
 	private const string ScriptVer = "1.3b";
 	private const string ScriptAuthor = "Kryo4lex";
-	private string f_Aircrafts;
+	private string f_Aircrafts = "scripts//Jet_HUD//Jet_HUD_aircrafts.ini";
 	private ScriptSettings Config;
 	private bool modEnabled;
 	private bool reallifeDateTime;
@@ -180,7 +180,7 @@ public class Jet_HUD : Script
 		this._wShape = new CustomSprite(
 			"scripts//Jet_HUD//W.png",
 			new Size(104, 60),
-			new Point((int)GTA.UI.Screen.Width/2, (int)GTA.UI.Screen.Height/2),
+			new PointF(GTA.UI.Screen.Width/2, GTA.UI.Screen.Height/2),
 			this.color_HUD,
 			0.0f,
 			true
@@ -269,11 +269,11 @@ public class Jet_HUD : Script
 			this.draw3DRadar();
 		if (this.displayArtificialHorizon)
 			this.drawArtificialHorizon();
-		if (this.displayMinimapRadar && this.aircraftRadarLastTime + this.aircraftRadarInterval <= (long) Environment.TickCount)
-		{
-			this.processAircraftRadar();
-			this.aircraftRadarLastTime = (long) Environment.TickCount;
-		}
+		//if (this.displayMinimapRadar && this.aircraftRadarLastTime + this.aircraftRadarInterval <= (long) Environment.TickCount)
+		//{
+		//	this.processAircraftRadar();
+		//	this.aircraftRadarLastTime = (long) Environment.TickCount;
+		//}
 		if (this.displayMissileWarnSystem)
 			this.drawMissileWarnSystem();
 		this.glblTextureDrawIndex = 1;
@@ -687,6 +687,7 @@ label_5:
 		float rotation = y / 360f;
 		this._wShape.Rotation = rotation;
 		this._wShape.Draw();
+		GTA.UI.Screen.ShowHelpTextThisFrame("Drawing artificial horizon");
 		++this.glblTextureDrawIndex;
 	}
 
@@ -785,13 +786,13 @@ label_5:
 		{
 			foreach (Vehicle vehicle in nearbyVehicles)
 			{
-				if (vehicle != null && !this.vehsWithBlips.Contains(vehicle) && (((Entity) vehicle).Exists() && ((Entity) vehicle).IsAlive) && (!((Entity) vehicle).AttachedBlip.Exists() && (!this.onlyShowAircraftWithDriver || !vehicle.IsSeatFree(VehicleSeat.Driver))))
+				if (vehicle != null && !this.vehsWithBlips.Contains(vehicle) && (vehicle.Exists() && ((Entity) vehicle).IsAlive) && (!((Entity) vehicle).AttachedBlip.Exists() && (!this.onlyShowAircraftWithDriver || !vehicle.IsSeatFree(VehicleSeat.Driver))))
 				{
-					Model model = ((Entity) vehicle).Model;
-					bool isPlane;
-					if (((isPlane = (model).IsPlane) || (model).IsHelicopter) && model != VehicleHash.Polmav)
+					Model model = vehicle.Model;
+					bool isPlane = (model).IsPlane || (model).IsHelicopter && model != VehicleHash.Polmav;
+					if (isPlane)
 					{
-						Blip blip = ((Entity) vehicle).AddBlip();
+						Blip blip = vehicle.AddBlip();
 						if (vehicle.DisplayName.ToUpper() == "LAZER" || vehicle.DisplayName.ToUpper() == "BESRA")
 							blip.Sprite = BlipSprite.Jet;
 						else
@@ -821,25 +822,9 @@ label_5:
 		this.vehsWithBlips.Clear();
 	}
 
-	private void drawTexture(
-		string filename,
-		int index,
-		int level,
-		int time,
-		Point pos,
-		PointF center,
-		Size size,
-		float rotation,
-		Color color,
-		float aspectRaio)
-	{
-		GTA.UI.Screen.ShowHelpTextThisFrame("Drawing texture");
-		/*
-		UI.DrawTexture(filename, this.glblTextureDrawIndex, level, time, pos, center, size, rotation, color, aspectRaio);
-		++this.glblTextureDrawIndex;
-		 * */
-	}
 
+	private float screenWidth = GTA.UI.Screen.Width;
+	private float screenHeight = GTA.UI.Screen.Height;
 	private void drawString2(
 		string str,
 		float xpos,
@@ -848,11 +833,14 @@ label_5:
 		Color color,
 		bool centered)
 	{
-		/* do nothing
-		UIText uiText = new UIText(str, new Point((int) ((double) (float) GTA.UI.Screen.Width * (double) xpos), (int) ((double) (float) GTA.UI.Screen.Height * (double) ypos)), scale, color, (Font) 4, centered);
-		uiText.set_Enabled(true);
-		uiText.Draw();
-		 * */
+		TextElement te = new TextElement(
+			str,
+			new PointF(screenWidth * xpos, screenHeight * ypos), 
+			scale, 
+			color,
+			GTA.UI.Font.ChaletComprimeCologne, 
+			centered ? Alignment.Center : Alignment.Left);
+		te.Draw();
 	}
 
 	private void drawString(
@@ -863,34 +851,14 @@ label_5:
 		Color color,
 		bool centered)
 	{
-		/*
-		UIText uiText = new UIText(str, new Point((int) ((double) (float) GTA.UI.Screen.Width * (double) xpos), (int) ((double) (float) GTA.UI.Screen.Height * (double) ypos)), scale, color, (Font) 2, centered);
-		uiText.set_Enabled(true);
-		uiText.Draw();
-		 * */
-	}
-
-	public void draw2DBox(
-		float x,
-		float y,
-		float width,
-		float height,
-		float thickness,
-		Color color,
-		bool upper,
-		bool lower,
-		bool left,
-		bool right)
-	{
-		if (upper)
-			this.drawRect(x, y, width, thickness, color);
-		if (lower)
-			this.drawRect(x, y + height, width, thickness, color);
-		if (left)
-			this.drawRect(x - width / 2f, y + height / 2f, 1f / 500f, height, color);
-		if (!right)
-			return;
-		this.drawRect(x + width / 2f, y + height / 2f, 1f / 500f, height, color);
+		TextElement te = new TextElement(
+			str,
+			new PointF(screenWidth * xpos, screenHeight * ypos),
+			scale, 
+			color, 
+			GTA.UI.Font.Monospace, 
+			centered ? Alignment.Center : Alignment.Left);
+		te.Draw();
 	}
 
 	public void drawLine(Vector3 from, Vector3 to, Color col)

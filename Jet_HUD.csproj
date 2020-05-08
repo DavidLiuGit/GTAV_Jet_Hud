@@ -43,4 +43,7 @@
     <Compile Include="AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy /Y "$(Targetpath)" "H:\Games\Grand Theft Auto V\scripts"</PostBuildEvent>
+  </PropertyGroup>
 </Project>
