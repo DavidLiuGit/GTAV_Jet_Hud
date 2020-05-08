@@ -75,7 +75,7 @@ public class Jet_HUD : Script
 
 
 	// HUD components & CustomSprites
-	//UI.DrawTexture("scripts//Jet_HUD//Rectangle.png", num1, 1, 100, GTA.UI.Screen.WorldToScreen(((Entity) vehicle).get_Position()), new PointF(0.5f, 0.5f), new Size(this.correctedWidth, 30), 0.0f, this.color_HUD);
+	//UI.DrawTexture("scripts//Jet_HUD//Rectangle.png", num1, 1, 100, GTA.UI.Screen.WorldToScreen(((Entity) vehicle).Position), new PointF(0.5f, 0.5f), new Size(this.correctedWidth, 30), 0.0f, this.color_HUD);
 	private CustomSprite _rectangle;
 	private CustomSprite _wShape;
 
@@ -189,9 +189,9 @@ public class Jet_HUD : Script
 		//base.\u002Ector();
 		this.LoadIniFile();
 		this.correctedWidth = (int) (30.0 * (1.77778005599976 / (double) this.GetScreenResolutionRatioX()));
-		this.add_Tick(new EventHandler(this.OnTick));
-		this.add_KeyDown(new KeyEventHandler(this.OnKeyDown));
-		this.add_Aborted(new EventHandler(this.OnAborted));
+		this.Tick += OnTick;
+		this.KeyDown += OnKeyDown;
+		this.Aborted += OnAborted;
 	}
 
 	private void LoadIniFile()
@@ -226,16 +226,16 @@ public class Jet_HUD : Script
 
 	private void OnTick(object sender, EventArgs e)
 	{
-		this.PlayerPed = Game.get_Player().get_Character();
-		this.Aircraft = this.PlayerPed.get_CurrentVehicle();
-		if (Entity.op_Inequality((Entity) this.Aircraft, (Entity) null))
+		this.PlayerPed = Game.Player.Character;
+		this.Aircraft = this.PlayerPed.CurrentVehicle;
+		if (this.Aircraft != null)
 		{
 			if (this.modEnabled)
 			{
 				List<string> supportedAircraftList = this.SupportedAircraftList;
-				Model model = ((Entity) this.PlayerPed.get_CurrentVehicle()).get_Model();
-				string str = ((Model) model).get_Hash().ToString();
-				if (supportedAircraftList.Contains(str) && this.PlayerPed.get_CurrentVehicle().get_IsDriveable())
+				Model model = this.PlayerPed.CurrentVehicle.Model;
+				string str = model.GetHashCode().ToString();
+				if (supportedAircraftList.Contains(str) && this.PlayerPed.CurrentVehicle.IsDriveable)
 					this.mainFeatures();
 			}
 		}
@@ -289,14 +289,8 @@ public class Jet_HUD : Script
 					this.modEnabled = !this.modEnabled;
 					this.toggle_step = 0;
 					this.removeBlips();
-					Function.Call(Hash.DISPLAY_HUD, new InputArgument[1]
-					{
-						InputArgument.op_Implicit(true)
-					});
-					Function.Call(Hash.DISPLAY_RADAR, new InputArgument[1]
-					{
-						InputArgument.op_Implicit(true)
-					});
+					Function.Call(Hash.DISPLAY_HUD, true);
+					Function.Call(Hash.DISPLAY_RADAR, true);
 					break;
 				}
 				this.toggle_step = 0;
@@ -324,13 +318,13 @@ public class Jet_HUD : Script
 		if (!Game.IsControlPressed((GTA.Control) 26) || !Game.IsControlPressed((GTA.Control) 22) || (!Game.IsControlPressed((GTA.Control) 87) || !this.PlayerPed.IsInVehicle()))
 			return;
 		List<string> supportedAircraftList1 = this.SupportedAircraftList;
-		Model model1 = ((Entity) this.PlayerPed.get_CurrentVehicle()).get_Model();
-		string str1 = ((Model) model1).get_Hash().ToString();
+		Model model1 = ((Entity) this.PlayerPed.CurrentVehicle).Model;
+		string str1 = (model1).GetHashCode().ToString();
 		if (!supportedAircraftList1.Contains(str1))
 		{
 			List<string> supportedAircraftList2 = this.SupportedAircraftList;
-			Model model2 = ((Entity) this.PlayerPed.get_CurrentVehicle()).get_Model();
-			string str2 = ((Model) model2).get_Hash().ToString();
+			Model model2 = ((Entity) this.PlayerPed.CurrentVehicle).Model;
+			string str2 = (model2).GetHashCode().ToString();
 			supportedAircraftList2.Add(str2);
 			if (File.Exists(this.f_Aircrafts))
 				File.WriteAllLines(this.f_Aircrafts, (IEnumerable<string>) this.SupportedAircraftList);
@@ -342,10 +336,7 @@ public class Jet_HUD : Script
 
 	private void drawDateTime()
 	{
-		float xpos = (float) (1.0 - Function.Call<float>(Hash._GET_ASPECT_RATIO, new InputArgument[1]
-		{
-			InputArgument.op_Implicit(false)
-		}) / 10.0) + this.xOffsetRight;
+		float xpos = (float) (1.0 - Function.Call<float>(Hash._GET_ASPECT_RATIO, false) / 10.0) + this.xOffsetRight;
 		float ypos = 0.0f;
 		if (this.reallifeDateTime)
 		{
@@ -368,28 +359,21 @@ public class Jet_HUD : Script
 	{
 		float xpos = 0.0f;
 		float ypos = 0.5f;
-		this.drawString2("SPD " + (this.Aircraft.get_Speed() * 3.6f).ToString("0"), xpos, ypos, 0.75f, this.color_HUD, false);
-		this.drawString2("VSPD " + (((float) ((Entity) this.Aircraft).get_Position().Z - this.heightBef) / Game.get_LastFrameTime()).ToString("0.00", (IFormatProvider) CultureInfo.InvariantCulture), xpos, ypos + 0.04f, 0.75f, this.color_HUD, false);
-		this.drawString2("ROL  " + ((float) ((Vector3) Function.Call<Vector3>((Hash) 0xAFBD61CC738D9EB9, new InputArgument[2]
-		{
-			InputArgument.op_Implicit(this.Aircraft),
-			InputArgument.op_Implicit(2)
-		})).Y).ToString("0") + "°", xpos, ypos + 0.08f, 0.75f, this.color_HUD, false);
-		this.drawString2("PIT   " + ((float) ((Entity) this.Aircraft).get_Rotation().X).ToString("0") + "°", xpos, ypos + 0.12f, 0.75f, this.color_HUD, false);
-		this.heightBef = (float) ((Entity) this.Aircraft).get_Position().Z;
+		this.drawString2("SPD " + (this.Aircraft.Speed * 3.6f).ToString("0"), xpos, ypos, 0.75f, this.color_HUD, false);
+		this.drawString2("VSPD " + (((float) ((Entity) this.Aircraft).Position.Z - this.heightBef) / Game.LastFrameTime).ToString("0.00", (IFormatProvider) CultureInfo.InvariantCulture), xpos, ypos + 0.04f, 0.75f, this.color_HUD, false);
+		this.drawString2("ROL  " + ((float)((Vector3)Function.Call<Vector3>(Hash.GET_ENTITY_ROTATION, this.Aircraft, 2)).Y).ToString("0") + "°", xpos, ypos + 0.08f, 0.75f, this.color_HUD, false);
+		this.drawString2("PIT   " + ((float) ((Entity) this.Aircraft).Rotation.X).ToString("0") + "°", xpos, ypos + 0.12f, 0.75f, this.color_HUD, false);
+		this.heightBef = (float) ((Entity) this.Aircraft).Position.Z;
 	}
 
 	private void drawMechanicalInfo()
 	{
 		this.getSelectedAircraftWeapons();
-		float xpos = (float) (0.975000023841858 - Function.Call<float>((Hash) 0xF1307EF624A80D87, new InputArgument[1]
-		{
-			InputArgument.op_Implicit(false)
-		}) / 10.0) + this.xOffsetRight;
+		float xpos = (float) (0.975000023841858 - Function.Call<float>((Hash) 0xF1307EF624A80D87, false) / 10.0) + this.xOffsetRight;
 		float ypos = 0.88f;
 		if (Jet_HUD.GetVehicleCurrentWeapon(this.PlayerPed) != 0U)
 			this.drawString2(this.weaponSelectionText, xpos, ypos - 0.04f, 0.75f, this.color_HUD, false);
-		this.drawString2("HGHT " + ((Entity) this.Aircraft).get_Position().Z.ToString("0"), xpos, ypos, 0.75f, this.color_HUD, false);
+		this.drawString2("HGHT " + ((Entity) this.Aircraft).Position.Z.ToString("0"), xpos, ypos, 0.75f, this.color_HUD, false);
 		Color colorHud1 = this.color_HUD;
 		string str1 = "GEAR DOWN";
 		if (this.Aircraft.LandingGearState == VehicleLandingGearState.Retracting || this.Aircraft.LandingGearState == VehicleLandingGearState.Retracting)
@@ -402,7 +386,7 @@ public class Jet_HUD : Script
 			if (this.Timer1Switch)
 				this.drawString2(str1, xpos, ypos + 0.04f, 0.75f, color, false);
 		}
-		else if (this.Aircraft.LandingGearState == null)
+		else if (this.Aircraft.LandingGearState == VehicleLandingGearState.Deployed)
 		{
 			string str2 = "GEAR DOWN";
 			Color colorHud2 = this.color_HUD;
@@ -430,11 +414,11 @@ public class Jet_HUD : Script
 	{
 		if ((long) Environment.TickCount >= this.gpsLast + this.gpsRefreshRate)
 		{
-			this.gpsX = (float) ((Entity) this.Aircraft).get_Position().X;
-			this.gpsY = (float) ((Entity) this.Aircraft).get_Position().Y;
+			this.gpsX = (float) ((Entity) this.Aircraft).Position.X;
+			this.gpsY = (float) ((Entity) this.Aircraft).Position.Y;
 			this.gpsLast = (long) Environment.TickCount;
 		}
-		this.drawString2("GPS DTA\nLNG " + this.gpsX.ToString("0") + "\nLAT " + this.gpsY.ToString("0") + "\n" + World.GetZoneDisplayName((this.Aircraft).get_Position()).ToUpper(), 0.0f, 0.0f, 0.5f, this.color_HUD, false);
+		this.drawString2("GPS DTA\nLNG " + this.gpsX.ToString("0") + "\nLAT " + this.gpsY.ToString("0") + "\n" + World.GetZoneDisplayName((this.Aircraft).Position).ToUpper(), 0.0f, 0.0f, 0.5f, this.color_HUD, false);
 	}
 
 	private float getAngleBetween2Points2D(Vector3 p1, Vector3 p2)
@@ -456,16 +440,16 @@ public class Jet_HUD : Script
 	private void drawCompass()
 	{
 		float y = 0.1f;
-		float num1 = (float) ((Entity) this.Aircraft).get_Rotation().Z;
+		float num1 = (float) ((Entity) this.Aircraft).Rotation.Z;
 		if ((double) num1 < 0.0)
 			num1 = 360f + num1;
 		float num2 = 360f - num1;
 		float num3 = 0.0f;
 		char ch = 'L';
-		bool isWaypointActive = Game.get_IsWaypointActive();
+		bool isWaypointActive = Game.IsWaypointActive;
 		if (isWaypointActive)
 		{
-			float num4 = this.getAngleBetween2Points2D(((Entity) this.Aircraft).get_Position(), World.WaypointPosition) - this.getAngleBetween2Points2D(Vector3.op_Addition(((Entity) this.Aircraft).get_Position(), Vector3.op_Multiply(((Entity) this.Aircraft).get_ForwardVector(), 10f)), ((Entity) this.Aircraft).get_Position());
+			float num4 = this.getAngleBetween2Points2D(((Entity)this.Aircraft).Position, World.WaypointPosition) - this.getAngleBetween2Points2D(this.Aircraft.Position + this.Aircraft.ForwardVector * 10f, this.Aircraft.Position); //this.getAngleBetween2Points2D(Vector3.op_Addition(((Entity) this.Aircraft).Position, Vector3.op_Multiply(((Entity) this.Aircraft).ForwardVector, 10f)), ((Entity) this.Aircraft).Position);
 			float num5 = num4;
 			if ((double) num4 < -180.0)
 			{
@@ -509,7 +493,7 @@ public class Jet_HUD : Script
 		this.drawString2("HDG " + num2.ToString("0") + "° " + str1, 0.5f, 0.0f, 0.5f, this.color_HUD, true);
 		this.drawRect(0.5f, y, 0.4f, 3f / 1000f, this.color_HUD);
 		this.drawRect(0.5f, y + 0.015f, 3f / 1000f, 0.03f, this.color_HUD);
-		float num6 = (float) ((Entity) this.Aircraft).get_Rotation().Z;
+		float num6 = (float) ((Entity) this.Aircraft).Rotation.Z;
 		if ((double) num6 < 0.0)
 			num6 = 360f + num6;
 		float num7 = (float) (((double) ((int) num6 % 10) + ((double) num6 - System.Math.Truncate((double) num6))) / 10.0);
@@ -578,21 +562,21 @@ public class Jet_HUD : Script
 				Array.Clear((Array) this.vehicles, 0, this.vehicles.Length);
 			this.vehicles = Array.FindAll<Vehicle>(World.GetAllVehicles(), (Predicate<Vehicle>) (v =>
 			{
-				Model model1 = ((Entity) v).get_Model();
-				if (!((Model) model1).get_IsPlane())
+				Model model1 = ((Entity) v).Model;
+				if (!(model1).IsPlane)
 				{
-					Model model2 = ((Entity) v).get_Model();
-					if (!((Model) model2).get_IsHelicopter())
+					Model model2 = ((Entity) v).Model;
+					if (!(model2).IsHelicopter)
 					{
-						Model model3 = ((Entity) v).get_Model();
-						if (!((Model) model3).get_IsCargobob())
+						Model model3 = ((Entity) v).Model;
+						if (!(model3).IsCargobob)
 							goto label_5;
 					}
 				}
-				if (Entity.op_Inequality((Entity) v, (Entity) this.Aircraft))
+				if (v == this.Aircraft)
 				{
-					Vector3 position = ((Entity) v).get_Position();
-					return (double) position.DistanceTo(((Entity) this.Aircraft).get_Position()) <= (double) this.blipRadius;
+					Vector3 position = v.Position;
+					return (double) position.DistanceTo(((Entity) this.Aircraft).Position) <= (double) this.blipRadius;
 				}
 label_5:
 				return false;
@@ -604,25 +588,20 @@ label_5:
 		// draw rectangles around each vehicle
 		foreach (Vehicle vehicle in this.vehicles)
 		{
-			if (Entity.op_Inequality((Entity) vehicle, (Entity) this.Aircraft) && vehicle.get_IsDriveable() && ((Entity) vehicle).get_IsOnScreen())
+			if (vehicle != this.Aircraft && vehicle.IsDriveable && vehicle.IsOnScreen)
 			{
-				if (Function.Call<bool>((Hash) 0xFCDFF7B72D23A1AC, new InputArgument[3]
+				if (Function.Call<bool>(Hash.HAS_ENTITY_CLEAR_LOS_TO_ENTITY, vehicle, this.Aircraft, 17) == true && !vehicle.IsOccluded)
 				{
-					InputArgument.op_Implicit(vehicle),
-					InputArgument.op_Implicit(this.Aircraft),
-					InputArgument.op_Implicit(17)
-				}) != null && !((Entity) vehicle).get_IsOccluded())
-				{
-					Point screen = GTA.UI.Screen.WorldToScreen(((Entity) vehicle).get_Position());
+					PointF screen = GTA.UI.Screen.WorldToScreen(((Entity) vehicle).Position);
 					float xpos = (float) screen.X / GTA.UI.Screen.Width;
 					float num2 = (float) screen.Y / GTA.UI.Screen.Height;
 					if (screen.X != 0 && screen.Y != 0)
 					{
-						//UI.DrawTexture("scripts//Jet_HUD//Rectangle.png", num1, 1, 100, GTA.UI.Screen.WorldToScreen(((Entity) vehicle).get_Position()), new PointF(0.5f, 0.5f), new Size(this.correctedWidth, 30), 0.0f, this.color_HUD);
+						//UI.DrawTexture("scripts//Jet_HUD//Rectangle.png", num1, 1, 100, GTA.UI.Screen.WorldToScreen(((Entity) vehicle).Position), new PointF(0.5f, 0.5f), new Size(this.correctedWidth, 30), 0.0f, this.color_HUD);
 						//this._rectangle.Draw();
 						++num1;
-						Vector3 position = ((Entity) vehicle).get_Position();
-						this.drawString2("\nDST: " + position.DistanceTo(((Entity) this.Aircraft).get_Position()).ToString("0"), xpos, num2 - 0.085f, 0.5f, this.color_HUD, true);
+						Vector3 position = ((Entity) vehicle).Position;
+						this.drawString2("\nDST: " + position.DistanceTo(((Entity) this.Aircraft).Position).ToString("0"), xpos, num2 - 0.085f, 0.5f, this.color_HUD, true);
 					}
 				}
 			}
@@ -631,12 +610,8 @@ label_5:
 
 	private void drawArtificialHorizon()
 	{
-		float y = (float) ((Vector3) Function.Call<Vector3>((Hash) 0xAFBD61CC738D9EB9, new InputArgument[2]
-		{
-			InputArgument.op_Implicit(this.Aircraft),
-			InputArgument.op_Implicit(2)
-		})).Y;
-		Point screen = GTA.UI.Screen.WorldToScreen(Vector3.op_Addition(((Entity) this.Aircraft).get_Position(), Vector3.op_Multiply(((Entity) this.Aircraft).get_ForwardVector(), 100f)));
+		float y = Function.Call<Vector3>((Hash) 0xAFBD61CC738D9EB9, this.Aircraft, 2).Y;
+		PointF screen = GTA.UI.Screen.WorldToScreen( this.Aircraft.Position + this.Aircraft.ForwardVector * 100f);
 		float num1 = (float) -(screen.Y / GTA.UI.Screen.Height - 0.5);
 		float num2 = (float) (screen.X / GTA.UI.Screen.Width - 0.5);
 		if (this.staticArtificialHorizon)
@@ -644,7 +619,7 @@ label_5:
 			num1 = 0.0f;
 			num2 = 0.0f;
 		}
-		((Entity) this.Aircraft).get_Rotation();
+		//((Entity) this.Aircraft.Rotation;
 		bool flag = true;
 		if (screen.X == 0 && screen.X == 0 || Game.IsControlPressed((GTA.Control) 26))
 			flag = false;
@@ -726,17 +701,17 @@ label_5:
 		}
 		foreach (Entity prop in this.props)
 		{
-			Model model = prop.get_Model();
-			if (((Model) model).get_Hash() != this.rpgRocketHash)
+			Model model = prop.Model;
+			if ((model).GetHashCode() != this.rpgRocketHash)
 			{
-				model = prop.get_Model();
-				if (((Model) model).get_Hash() != this.homingRocketHash)
+				model = prop.Model;
+				if ((model).GetHashCode() != this.homingRocketHash)
 				{
-					model = prop.get_Model();
-					if (((Model) model).get_Hash() != this.hunterGuidedRocketHash)
+					model = prop.Model;
+					if ((model).GetHashCode() != this.hunterGuidedRocketHash)
 					{
-						model = prop.get_Model();
-						if (((Model) model).get_Hash() != this.hunterBarrageRocketHash)
+						model = prop.Model;
+						if ((model).GetHashCode() != this.hunterBarrageRocketHash)
 							continue;
 					}
 				}
@@ -748,20 +723,20 @@ label_5:
 					InputArgument.op_Implicit(prop),
 					InputArgument.op_Implicit(this.Aircraft),
 					InputArgument.op_Implicit(17)
-				}) != null && !prop.get_IsOccluded())
+				}) != null && !prop.IsOccluded)
 				{
 					Vector3 vector3 = prop.get_Velocity();
 					if ((double) (vector3).Length() > 1.0)
 					{
-						Point screen = GTA.UI.Screen.WorldToScreen(prop.get_Position());
+						PointF screen = GTA.UI.Screen.WorldToScreen(prop.Position);
 						float xpos = (float) screen.X / (float) GTA.UI.Screen.Width;
 						float num1 = (float) screen.Y / (float) GTA.UI.Screen.Height;
 						if (screen.X != 0 && screen.Y != 0)
 						{
-							vector3 = prop.get_Position();
-							float num2 = (vector3).DistanceTo(((Entity) this.Aircraft).get_Position());
-							vector3 = prop.get_Position();
-							this.drawString2("\nMISL DST: " + (vector3).DistanceTo(((Entity) this.Aircraft).get_Position()).ToString("0"), xpos, num1 - 0.085f, 0.5f, Color.Red, true);
+							vector3 = prop.Position;
+							float num2 = (vector3).DistanceTo(((Entity) this.Aircraft).Position);
+							vector3 = prop.Position;
+							this.drawString2("\nMISL DST: " + (vector3).DistanceTo(((Entity) this.Aircraft).Position).ToString("0"), xpos, num1 - 0.085f, 0.5f, Color.Red, true);
 							float scale = (float) (150.0 / (double) num2 * 1.5);
 							if ((double) num2 <= 150.0)
 								scale = 1.5f;
@@ -778,7 +753,7 @@ label_5:
 		using (List<HudComponent>.Enumerator enumerator = this.hudComponentsToRemove.GetEnumerator())
 		{
 			while (enumerator.MoveNext())
-				UI.HideHudComponentThisFrame(enumerator.Current);
+				GTA.UI.Hud.HideComponentThisFrame(enumerator.Current);
 		}
 	}
 
@@ -791,8 +766,8 @@ label_5:
 				Vehicle vehsWithBlip = this.vehsWithBlips[index];
 				if (!Entity.op_Equality((Entity) vehsWithBlip, (Entity) null) && ((Entity) vehsWithBlip).Exists() && ((Entity) vehsWithBlip).get_IsAlive() && (!this.onlyShowAircraftWithDriver || !vehsWithBlip.IsSeatFree(VehicleSeat.Driver)))
 				{
-					Vector3 position = ((Entity) vehsWithBlip).get_Position();
-					if ((double) (position).DistanceTo(((Entity) plrPed).get_Position()) <= (double) this.blipRadius)
+					Vector3 position = ((Entity) vehsWithBlip).Position;
+					if ((double) (position).DistanceTo(((Entity) plrPed).Position) <= (double) this.blipRadius)
 					{
 						((Entity) this.vehsWithBlips[index]).AttachedBlip.set_Rotation((int) ((Entity) vehsWithBlip).get_Heading());
 						continue;
@@ -817,9 +792,9 @@ label_5:
 			{
 				if (Entity.op_Inequality((Entity) vehicle, (Entity) null) && !this.vehsWithBlips.Contains(vehicle) && (((Entity) vehicle).Exists() && ((Entity) vehicle).get_IsAlive()) && (!((Entity) vehicle).AttachedBlip.Exists() && (!this.onlyShowAircraftWithDriver || !vehicle.IsSeatFree(VehicleSeat.Driver))))
 				{
-					Model model = ((Entity) vehicle).get_Model();
+					Model model = ((Entity) vehicle).Model;
 					bool isPlane;
-					if (((isPlane = ((Model) model).get_IsPlane()) || ((Model) model).get_IsHelicopter()) && Model.op_Inequality(model, Model.op_Implicit("polmav")))
+					if (((isPlane = (model).IsPlane) || (model)..IsHelicopter) && Model.op_Inequality(model, Model.op_Implicit("polmav")))
 					{
 						Blip blip = ((Entity) vehicle).AddBlip();
 						if (vehicle.get_DisplayName().ToUpper() == "LAZER" || vehicle.get_DisplayName().ToUpper() == "BESRA")
@@ -875,9 +850,11 @@ label_5:
 		Color color,
 		bool centered)
 	{
+		/* do nothing
 		UIText uiText = new UIText(str, new Point((int) ((double) (float) GTA.UI.Screen.Width * (double) xpos), (int) ((double) (float) GTA.UI.Screen.Height * (double) ypos)), scale, color, (Font) 4, centered);
 		uiText.set_Enabled(true);
 		uiText.Draw();
+		 * */
 	}
 
 	private void drawString(
@@ -888,9 +865,11 @@ label_5:
 		Color color,
 		bool centered)
 	{
+		/*
 		UIText uiText = new UIText(str, new Point((int) ((double) (float) GTA.UI.Screen.Width * (double) xpos), (int) ((double) (float) GTA.UI.Screen.Height * (double) ypos)), scale, color, (Font) 2, centered);
 		uiText.set_Enabled(true);
 		uiText.Draw();
+		 * */
 	}
 
 	public void draw2DBox(
@@ -1087,7 +1066,7 @@ label_5:
 
 	public float getStandardisedPitch(Vehicle aircraft)
 	{
-		float num = (float) ((Entity) aircraft).get_Rotation().X;
+		float num = (float) ((Entity) aircraft).Rotation.X;
 		if ((double) num > 90.0)
 			num = (float) (90.0 - ((double) num - 90.0));
 		else if ((double) num < -90.0)
