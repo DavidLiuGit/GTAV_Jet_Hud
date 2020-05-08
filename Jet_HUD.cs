@@ -8,6 +8,7 @@ using GTA;
 using GTA.Math;
 using GTA.Native;
 using GTA.UI;
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -72,6 +73,11 @@ public class Jet_HUD : Script
 	private string weaponSelectionText;
 	private Dictionary<uint, string> VehicleWeapons;
 
+
+	// HUD components & CustomSprites
+	//UI.DrawTexture("scripts//Jet_HUD//Rectangle.png", num1, 1, 100, GTA.UI.Screen.WorldToScreen(((Entity) vehicle).get_Position()), new PointF(0.5f, 0.5f), new Size(this.correctedWidth, 30), 0.0f, this.color_HUD);
+	private CustomSprite _rectangle;
+	private CustomSprite _wShape;
 
 
 	public Jet_HUD()
@@ -164,6 +170,22 @@ public class Jet_HUD : Script
 				""
 			}
 		};
+
+		// custom sprites
+		this._rectangle = new CustomSprite(
+			"scripts//Jet_HUD//Rectangle.png", 
+			new Size(this.correctedWidth, 30), 
+			new PointF(0.5f, 0.5f), 
+			this.color_HUD);
+		this._wShape = new CustomSprite(
+			"scripts//Jet_HUD//W.png",
+			new Size(104, 60),
+			new Point((int)GTA.UI.Screen.Width/2, (int)GTA.UI.Screen.Height/2),
+			this.color_HUD,
+			0.0f,
+			true
+			);
+
 		//base.\u002Ector();
 		this.LoadIniFile();
 		this.correctedWidth = (int) (30.0 * (1.77778005599976 / (double) this.GetScreenResolutionRatioX()));
@@ -578,6 +600,8 @@ label_5:
 			this.lastTimeGetAllVehicles = (long) Environment.TickCount;
 		}
 		int num1 = 1;
+
+		// draw rectangles around each vehicle
 		foreach (Vehicle vehicle in this.vehicles)
 		{
 			if (Entity.op_Inequality((Entity) vehicle, (Entity) this.Aircraft) && vehicle.get_IsDriveable() && ((Entity) vehicle).get_IsOnScreen())
@@ -594,7 +618,8 @@ label_5:
 					float num2 = (float) screen.Y / GTA.UI.Screen.Height;
 					if (screen.X != 0 && screen.Y != 0)
 					{
-						UI.DrawTexture("scripts//Jet_HUD//Rectangle.png", num1, 1, 100, GTA.UI.Screen.WorldToScreen(((Entity) vehicle).get_Position()), new PointF(0.5f, 0.5f), new Size(this.correctedWidth, 30), 0.0f, this.color_HUD);
+						//UI.DrawTexture("scripts//Jet_HUD//Rectangle.png", num1, 1, 100, GTA.UI.Screen.WorldToScreen(((Entity) vehicle).get_Position()), new PointF(0.5f, 0.5f), new Size(this.correctedWidth, 30), 0.0f, this.color_HUD);
+						//this._rectangle.Draw();
 						++num1;
 						Vector3 position = ((Entity) vehicle).get_Position();
 						this.drawString2("\nDST: " + position.DistanceTo(((Entity) this.Aircraft).get_Position()).ToString("0"), xpos, num2 - 0.085f, 0.5f, this.color_HUD, true);
@@ -683,7 +708,10 @@ label_5:
 			this.drawString2(str, 0.3625f + num2, (float) ((double) num3 - 0.0350000001490116 + (double) index1 * (double) num4 - (double) num1 + (double) num5 * (double) num4), 0.4f, this.color_HUD, true);
 			this.drawString2(str, 0.6375f + num2, (float) ((double) num3 - 0.0350000001490116 + (double) index1 * (double) num4 - (double) num1 + (double) num5 * (double) num4), 0.4f, this.color_HUD, true);
 		}
-		UI.DrawTexture("scripts//Jet_HUD//W.png", this.glblTextureDrawIndex, 1, 100, new Point(640 + (int) ((double) num2 * 1280.0), 360 - (int) ((double) num1 * 720.0)), new PointF(0.5f, 0.5f), new Size(104, 60), y / 360f, this.color_HUD, this.GetScreenResolutionRatio());
+		//UI.DrawTexture("scripts//Jet_HUD//W.png", this.glblTextureDrawIndex, 1, 100, new Point(640 + (int) ((double) num2 * 1280.0), 360 - (int) ((double) num1 * 720.0)), new PointF(0.5f, 0.5f), new Size(104, 60), y / 360f, this.color_HUD, this.GetScreenResolutionRatio());
+		float rotation = y / 360f;
+		this._wShape.Rotation = rotation;
+		this._wShape.Draw();
 		++this.glblTextureDrawIndex;
 	}
 
