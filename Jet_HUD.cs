@@ -7,6 +7,7 @@
 using GTA;
 using GTA.Math;
 using GTA.Native;
+using GTA.UI;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -161,7 +162,7 @@ public class Jet_HUD : Script
         ""
       }
     };
-    base.\u002Ector();
+    //base.\u002Ector();
     this.LoadIniFile();
     this.correctedWidth = (int) (30.0 * (1.77778005599976 / (double) this.GetScreenResolutionRatioX()));
     this.add_Tick(new EventHandler(this.OnTick));
@@ -209,7 +210,7 @@ public class Jet_HUD : Script
       {
         List<string> supportedAircraftList = this.SupportedAircraftList;
         Model model = ((Entity) this.PlayerPed.get_CurrentVehicle()).get_Model();
-        string str = ((Model) ref model).get_Hash().ToString();
+        string str = ((Model) model).get_Hash().ToString();
         if (supportedAircraftList.Contains(str) && this.PlayerPed.get_CurrentVehicle().get_IsDriveable())
           this.mainFeatures();
       }
@@ -300,12 +301,12 @@ public class Jet_HUD : Script
       return;
     List<string> supportedAircraftList1 = this.SupportedAircraftList;
     Model model1 = ((Entity) this.PlayerPed.get_CurrentVehicle()).get_Model();
-    string str1 = ((Model) ref model1).get_Hash().ToString();
+    string str1 = ((Model) model1).get_Hash().ToString();
     if (!supportedAircraftList1.Contains(str1))
     {
       List<string> supportedAircraftList2 = this.SupportedAircraftList;
       Model model2 = ((Entity) this.PlayerPed.get_CurrentVehicle()).get_Model();
-      string str2 = ((Model) ref model2).get_Hash().ToString();
+      string str2 = ((Model) model2).get_Hash().ToString();
       supportedAircraftList2.Add(str2);
       if (File.Exists(this.f_Aircrafts))
         File.WriteAllLines(this.f_Aircrafts, (IEnumerable<string>) this.SupportedAircraftList);
@@ -554,20 +555,20 @@ public class Jet_HUD : Script
       this.vehicles = Array.FindAll<Vehicle>(World.GetAllVehicles(), (Predicate<Vehicle>) (v =>
       {
         Model model1 = ((Entity) v).get_Model();
-        if (!((Model) ref model1).get_IsPlane())
+        if (!((Model) model1).get_IsPlane())
         {
           Model model2 = ((Entity) v).get_Model();
-          if (!((Model) ref model2).get_IsHelicopter())
+          if (!((Model) model2).get_IsHelicopter())
           {
             Model model3 = ((Entity) v).get_Model();
-            if (!((Model) ref model3).get_IsCargobob())
+            if (!((Model) model3).get_IsCargobob())
               goto label_5;
           }
         }
         if (Entity.op_Inequality((Entity) v, (Entity) this.Aircraft))
         {
           Vector3 position = ((Entity) v).get_Position();
-          return (double) ((Vector3) ref position).DistanceTo(((Entity) this.Aircraft).get_Position()) <= (double) this.blipRadius;
+          return (double) position.DistanceTo(((Entity) this.Aircraft).get_Position()) <= (double) this.blipRadius;
         }
 label_5:
         return false;
@@ -594,7 +595,7 @@ label_5:
             UI.DrawTexture("scripts//Jet_HUD//Rectangle.png", num1, 1, 100, UI.WorldToScreen(((Entity) vehicle).get_Position()), new PointF(0.5f, 0.5f), new Size(this.correctedWidth, 30), 0.0f, this.color_HUD);
             ++num1;
             Vector3 position = ((Entity) vehicle).get_Position();
-            this.drawString2("\nDST: " + ((Vector3) ref position).DistanceTo(((Entity) this.Aircraft).get_Position()).ToString("0"), xpos, num2 - 0.085f, 0.5f, this.color_HUD, true);
+            this.drawString2("\nDST: " + position.DistanceTo(((Entity) this.Aircraft).get_Position()).ToString("0"), xpos, num2 - 0.085f, 0.5f, this.color_HUD, true);
           }
         }
       }
@@ -696,16 +697,16 @@ label_5:
     foreach (Entity prop in this.props)
     {
       Model model = prop.get_Model();
-      if (((Model) ref model).get_Hash() != this.rpgRocketHash)
+      if (((Model) model).get_Hash() != this.rpgRocketHash)
       {
         model = prop.get_Model();
-        if (((Model) ref model).get_Hash() != this.homingRocketHash)
+        if (((Model) model).get_Hash() != this.homingRocketHash)
         {
           model = prop.get_Model();
-          if (((Model) ref model).get_Hash() != this.hunterGuidedRocketHash)
+          if (((Model) model).get_Hash() != this.hunterGuidedRocketHash)
           {
             model = prop.get_Model();
-            if (((Model) ref model).get_Hash() != this.hunterBarrageRocketHash)
+            if (((Model) model).get_Hash() != this.hunterBarrageRocketHash)
               continue;
           }
         }
@@ -788,7 +789,7 @@ label_5:
         {
           Model model = ((Entity) vehicle).get_Model();
           bool isPlane;
-          if (((isPlane = ((Model) ref model).get_IsPlane()) || ((Model) ref model).get_IsHelicopter()) && Model.op_Inequality(model, Model.op_Implicit("polmav")))
+          if (((isPlane = ((Model) model).get_IsPlane()) || ((Model) model).get_IsHelicopter()) && Model.op_Inequality(model, Model.op_Implicit("polmav")))
           {
             Blip blip = ((Entity) vehicle).AddBlip();
             if (vehicle.get_DisplayName().ToUpper() == "LAZER" || vehicle.get_DisplayName().ToUpper() == "BESRA")
@@ -981,7 +982,7 @@ label_5:
   private float DirectionToHeadingInRadians(Vector3 dir)
   {
     dir.Z = (__Null) 0.0;
-    ((Vector3) ref dir).Normalize();
+    dir.Normalize();
     return (float) System.Math.Atan2((double) dir.X, (double) dir.Y);
   }
 
