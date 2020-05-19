@@ -194,6 +194,7 @@ public class Jet_HUD : Script
 		this.Tick += OnTick;
 		this.KeyDown += OnKeyDown;
 		this.Aborted += OnAborted;
+		this.Interval = 6;
 	}
 
 	private void LoadIniFile()
