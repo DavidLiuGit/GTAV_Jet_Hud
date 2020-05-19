@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 public class Jet_HUD : Script
@@ -35,6 +36,7 @@ public class Jet_HUD : Script
 	private int correctedWidth;
 	private string f_Settings;
 	private List<string> SupportedAircraftList;
+	private List<Model> SupportedAircraftModelList;
 	private bool blipResetNecessary;
 	private Vehicle Aircraft;
 	private Ped PlayerPed;
@@ -202,9 +204,9 @@ public class Jet_HUD : Script
 			this.modEnabled = (bool) this.Config.GetValue<bool>("SETTINGS", "modEnabled", true);
 			this.reallifeDateTime = (bool) this.Config.GetValue<bool>("SETTINGS", "REALLIFE_DATETIME", false);
 			this.displayArtificialHorizon = (bool) this.Config.GetValue<bool>("SETTINGS", "DISPLAY_ARTIFICIAL_HORIZON", true);
-			this.display3DRadar = (bool) this.Config.GetValue<bool>("SETTINGS", "DISPLAY_3D_RADAR",  true);
+			//this.display3DRadar = (bool) this.Config.GetValue<bool>("SETTINGS", "DISPLAY_3D_RADAR",  true);
 			this.displayMinimapRadar = (bool) this.Config.GetValue<bool>("SETTINGS", "DISPLAY_MINIMAP_RADAR",  true);
-			this.displayMissileWarnSystem = (bool) this.Config.GetValue<bool>("SETTINGS", "DISPLAY_MISSILE_WARN_SYSTEM", true);
+			//this.displayMissileWarnSystem = (bool) this.Config.GetValue<bool>("SETTINGS", "DISPLAY_MISSILE_WARN_SYSTEM", true);
 			this.staticArtificialHorizon = (bool) this.Config.GetValue<bool>("SETTINGS", "STATIC_ARTIFICIAL_HORIZON", false);
 			this.gpsRefreshRate = (long) this.Config.GetValue<long>("SETTINGS", "GPS_REFRESH_RATE",  500L);
 			this.getAllVehiclesInterval = (long) this.Config.GetValue<long>("SETTINGS", "3D_RADAR_REFRESH_RATE",  10000L);
@@ -212,6 +214,7 @@ public class Jet_HUD : Script
 			this.color_HUD = Color.FromArgb((int) this.Config.GetValue<int>("SETTINGS", "HUD_A",  (int) byte.MaxValue), (int) this.Config.GetValue<int>("SETTINGS", "HUD_R",  67), (int) this.Config.GetValue<int>("SETTINGS", "HUD_G",  197), (int) this.Config.GetValue<int>("SETTINGS", "HUD_B",  0));
 			this.xOffsetRight = float.Parse(((string) this.Config.GetValue<string>("SETTINGS", "XOFFSET_RIGHT_ELEMENTS",  "0.0")).Replace(',', '.'), (IFormatProvider) CultureInfo.InvariantCulture);
 			this.SupportedAircraftList = new List<string>((IEnumerable<string>) File.ReadAllLines(this.f_Aircrafts));
+			this.SupportedAircraftModelList = this.SupportedAircraftList.Select(aircraft => (Model) Game.GenerateHash(aircraft)).ToList();
 			this.blipRadius = 10000f;
 			this.airplaneSprite = (BlipSprite) 423;
 			this.helicopterSprite = (BlipSprite) 422;
@@ -221,6 +224,7 @@ public class Jet_HUD : Script
 		catch (Exception ex)
 		{
 			Notification.Show("~r~Error~w~:Failed to load JET HUD settings.");
+			Notification.Show(ex.ToString());
 		}
 	}
 
@@ -232,10 +236,9 @@ public class Jet_HUD : Script
 		{
 			if (this.modEnabled)
 			{
-				List<string> supportedAircraftList = this.SupportedAircraftList;
-				Model model = this.PlayerPed.CurrentVehicle.Model;
-				string str = model.GetHashCode().ToString();
-				if (supportedAircraftList.Contains(str) && this.PlayerPed.CurrentVehicle.IsDriveable)
+				Vehicle playerVeh = this.PlayerPed.CurrentVehicle;
+				Model model = this.Aircraft.Model;
+				if (this.SupportedAircraftModelList.Contains(model) && this.Aircraft.IsDriveable)
 					this.mainFeatures();
 			}
 		}
@@ -265,10 +268,10 @@ public class Jet_HUD : Script
 		this.drawMechanicalInfo();
 		this.drawGPSInfo();
 		this.drawCompass();
-		//if (this.display3DRadar)
-		//	this.draw3DRadar();
-		//if (this.displayArtificialHorizon)
-		//	this.drawArtificialHorizon();
+		if (this.display3DRadar)
+			this.draw3DRadar();
+		if (this.displayArtificialHorizon)
+			this.drawArtificialHorizon();
 		//if (this.displayMinimapRadar && this.aircraftRadarLastTime + this.aircraftRadarInterval <= (long) Environment.TickCount)
 		//{
 		//	this.processAircraftRadar();
@@ -359,6 +362,7 @@ public class Jet_HUD : Script
 	{
 		float xpos = 0.0f;
 		float ypos = 0.5f;
+		this.drawString2("ALT " + ((Entity)this.Aircraft).Position.Z.ToString("0"), xpos, ypos - 0.04f, 0.75f, this.color_HUD, false);
 		this.drawString2("SPD " + (this.Aircraft.Speed * 3.6f).ToString("0"), xpos, ypos, 0.75f, this.color_HUD, false);
 		this.drawString2("VSPD " + (((float) ((Entity) this.Aircraft).Position.Z - this.heightBef) / Game.LastFrameTime).ToString("0.00", (IFormatProvider) CultureInfo.InvariantCulture), xpos, ypos + 0.04f, 0.75f, this.color_HUD, false);
 		this.drawString2("ROL  " + ((float)((Vector3)Function.Call<Vector3>(Hash.GET_ENTITY_ROTATION, this.Aircraft, 2)).Y).ToString("0") + "°", xpos, ypos + 0.08f, 0.75f, this.color_HUD, false);
@@ -372,8 +376,7 @@ public class Jet_HUD : Script
 		float xpos = (float) (0.975000023841858 - Function.Call<float>((Hash) 0xF1307EF624A80D87, false) / 10.0) + this.xOffsetRight;
 		float ypos = 0.88f;
 		if (Jet_HUD.GetVehicleCurrentWeapon(this.PlayerPed) != 0U)
-			this.drawString2(this.weaponSelectionText, xpos, ypos - 0.04f, 0.75f, this.color_HUD, false);
-		this.drawString2("HGHT " + ((Entity) this.Aircraft).Position.Z.ToString("0"), xpos, ypos, 0.75f, this.color_HUD, false);
+			this.drawString2(this.weaponSelectionText, xpos, ypos, 0.75f, this.color_HUD, false);
 		Color colorHud1 = this.color_HUD;
 		string str1 = "GEAR DOWN";
 		if (this.Aircraft.LandingGearState == VehicleLandingGearState.Retracting || this.Aircraft.LandingGearState == VehicleLandingGearState.Retracting)
@@ -400,13 +403,13 @@ public class Jet_HUD : Script
 		}
 		if (this.Aircraft.IsEngineRunning || this.Aircraft.IsStopped)
 		{
-			this.drawString2("ENG  " + (this.Aircraft.IsEngineRunning ? "ON" : "OFF"), xpos, ypos + 0.08f, 0.75f, this.color_HUD, false);
+			this.drawString2("ENG " + (this.Aircraft.IsEngineRunning ? "ON" : "OFF") + " " + (int)this.Aircraft.EngineHealth, xpos, ypos + 0.08f, 0.75f, this.color_HUD, false);
 		}
 		else
 		{
 			if (!this.Timer1Switch)
 				return;
-			this.drawString2("ENG  " + (this.Aircraft.IsEngineRunning ? "ON" : "OFF"), xpos, ypos + 0.08f, 0.75f, Color.FromArgb(204, 204, 0), false);
+			this.drawString2("ENG " + (this.Aircraft.IsEngineRunning ? "ON" : "OFF") + " " + (int)this.Aircraft.EngineHealth, xpos, ypos + 0.08f, 0.75f, Color.FromArgb(204, 204, 0), false);
 		}
 	}
 
@@ -610,7 +613,8 @@ label_5:
 
 	private void drawArtificialHorizon()
 	{
-		float y = Function.Call<Vector3>((Hash) 0xAFBD61CC738D9EB9, this.Aircraft, 2).Y;
+		//GTA.UI.Hud.HideComponentThisFrame(HudComponent.Reticle);
+		float y = Function.Call<Vector3>((Hash)0xAFBD61CC738D9EB9, this.Aircraft, 2).Y;
 		PointF screen = GTA.UI.Screen.WorldToScreen( this.Aircraft.Position + this.Aircraft.ForwardVector * 100f);
 		float num1 = (float) -(screen.Y / GTA.UI.Screen.Height - 0.5);
 		float num2 = (float) (screen.X / GTA.UI.Screen.Width - 0.5);
