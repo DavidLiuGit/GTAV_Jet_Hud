@@ -265,17 +265,17 @@ public class Jet_HUD : Script
 		this.drawMechanicalInfo();
 		this.drawGPSInfo();
 		this.drawCompass();
-		if (this.display3DRadar)
-			this.draw3DRadar();
-		if (this.displayArtificialHorizon)
-			this.drawArtificialHorizon();
+		//if (this.display3DRadar)
+		//	this.draw3DRadar();
+		//if (this.displayArtificialHorizon)
+		//	this.drawArtificialHorizon();
 		//if (this.displayMinimapRadar && this.aircraftRadarLastTime + this.aircraftRadarInterval <= (long) Environment.TickCount)
 		//{
 		//	this.processAircraftRadar();
 		//	this.aircraftRadarLastTime = (long) Environment.TickCount;
 		//}
-		if (this.displayMissileWarnSystem)
-			this.drawMissileWarnSystem();
+		//if (this.displayMissileWarnSystem)
+		//	this.drawMissileWarnSystem();
 		this.glblTextureDrawIndex = 1;
 	}
 
@@ -686,8 +686,8 @@ label_5:
 		//UI.DrawTexture("scripts//Jet_HUD//W.png", this.glblTextureDrawIndex, 1, 100, new Point(640 + (int) ((double) num2 * 1280.0), 360 - (int) ((double) num1 * 720.0)), new PointF(0.5f, 0.5f), new Size(104, 60), y / 360f, this.color_HUD, this.GetScreenResolutionRatio());
 		float rotation = y / 360f;
 		this._wShape.Rotation = rotation;
+		this._wShape.Position = new Point(640 + (int)((double)num2 * 1280.0), 360 - (int)((double)num1 * 720.0));
 		this._wShape.Draw();
-		GTA.UI.Screen.ShowHelpTextThisFrame("Drawing artificial horizon");
 		++this.glblTextureDrawIndex;
 	}
 
