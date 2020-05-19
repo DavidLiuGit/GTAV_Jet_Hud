@@ -174,19 +174,19 @@ public class Jet_HUD : Script
 		};
 
 		// custom sprites
-		this._rectangle = new CustomSprite(
-			"scripts//Jet_HUD//Rectangle.png", 
-			new Size(this.correctedWidth, 30), 
-			new PointF(0.5f, 0.5f), 
-			this.color_HUD);
-		this._wShape = new CustomSprite(
-			"scripts//Jet_HUD//W.png",
-			new Size(104, 60),
-			new PointF(GTA.UI.Screen.Width/2, GTA.UI.Screen.Height/2),
-			this.color_HUD,
-			0.0f,
-			true
-			);
+		//this._rectangle = new CustomSprite(
+		//	"scripts//Jet_HUD//Rectangle.png", 
+		//	new Size(this.correctedWidth, 30), 
+		//	new PointF(0.5f, 0.5f), 
+		//	this.color_HUD);
+		//this._wShape = new CustomSprite(
+		//	"scripts//Jet_HUD//W.png",
+		//	new Size(104, 60),
+		//	new PointF(GTA.UI.Screen.Width/2, GTA.UI.Screen.Height/2),
+		//	this.color_HUD,
+		//	0.0f,
+		//	true
+		//	);
 
 		//base.\u002Ector();
 		this.LoadIniFile();
@@ -194,7 +194,7 @@ public class Jet_HUD : Script
 		this.Tick += OnTick;
 		this.KeyDown += OnKeyDown;
 		this.Aborted += OnAborted;
-		this.Interval = 6;
+		this.Interval = 3;
 	}
 
 	private void LoadIniFile()
@@ -614,7 +614,10 @@ label_5:
 
 	private void drawArtificialHorizon()
 	{
-		//GTA.UI.Hud.HideComponentThisFrame(HudComponent.Reticle);
+		// if cinematic cam is rendering, do nothing
+		//if (Function.Call<bool>(Hash.IS_CINEMATIC_CAM_RENDERING))
+		//	return;
+
 		float y = Function.Call<Vector3>((Hash)0xAFBD61CC738D9EB9, this.Aircraft, 2).Y;
 		PointF screen = GTA.UI.Screen.WorldToScreen( this.Aircraft.Position + this.Aircraft.ForwardVector * 100f);
 		float num1 = (float) -(screen.Y / GTA.UI.Screen.Height - 0.5);
@@ -689,10 +692,10 @@ label_5:
 			this.drawString2(str, 0.6375f + num2, (float) ((double) num3 - 0.0350000001490116 + (double) index1 * (double) num4 - (double) num1 + (double) num5 * (double) num4), 0.4f, this.color_HUD, true);
 		}
 		//UI.DrawTexture("scripts//Jet_HUD//W.png", this.glblTextureDrawIndex, 1, 100, new Point(640 + (int) ((double) num2 * 1280.0), 360 - (int) ((double) num1 * 720.0)), new PointF(0.5f, 0.5f), new Size(104, 60), y / 360f, this.color_HUD, this.GetScreenResolutionRatio());
-		float rotation = y / 360f;
-		this._wShape.Rotation = rotation;
-		this._wShape.Position = new Point(640 + (int)((double)num2 * 1280.0), 360 - (int)((double)num1 * 720.0));
-		this._wShape.Draw();
+		//float rotation = y / 360f;
+		//this._wShape.Rotation = rotation;
+		//this._wShape.Position = new Point(640 + (int)((double)num2 * 1280.0), 360 - (int)((double)num1 * 720.0));
+		//this._wShape.Draw();
 		++this.glblTextureDrawIndex;
 	}
 
