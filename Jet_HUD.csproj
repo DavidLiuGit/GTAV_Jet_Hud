@@ -35,10 +35,12 @@
     <Reference Include="ScriptHookVDotNet3">
       <HintPath>E:\Games\GTAV\ScriptHookVDotNet3.dll</HintPath>
     </Reference>
+    <Reference Include="System" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Countermeasures.cs" />
     <Compile Include="Jet_HUD.cs" />
     <Compile Include="AssemblyInfo.cs" />
   </ItemGroup>
